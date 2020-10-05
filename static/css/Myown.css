@@ -1,0 +1,46 @@
+.footer_db{
+    background: #F0F0F0  ;
+    color: #C0C0C0  ;
+    height:100px;
+    width:100%;
+    padding-bottom: 20px;
+    bottom: 0;
+}
+
+.ft{
+    color:#B0C4DE;
+    font-size: 50px;
+    font-family: Serif;
+}
+
+.content{
+      width:400px;
+        height:400px;
+        box-shadow: 5px 5px 5px #888888;
+}
+
+.flow{
+    height: 400px;
+    width: 100%;
+    overflow: scroll;
+    }
+
+ #Blty {
+        width:300px;
+        height:200px;
+        border:;
+    }
+    .grey{
+        color:#787878 ;
+    }
+    .page{
+        cursor:default;
+    }
+    .vlog-type{
+        cursor:Pointer;
+    }
+
+    .hi{
+        display:none;
+        background: #1d2124;
+    }

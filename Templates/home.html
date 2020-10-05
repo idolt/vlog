@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block  title %}
+    博客首页
+{% endblock %}
+
+{% block blog %}
+{% load static %}
+    <div class="box">
+<ul class="minbox">
+<li><img src="{% static 'picture/01.jpg' %}" width="100" height="100"></li>
+<li><img src="{% static 'picture/02.jpg' %}" width="100" height="100"></li>
+<li><img src="{% static 'picture/03.jpg' %}" width="100" height="100"></li>
+<li><img src="{% static 'picture/04.jpg' %}" width="100" height="100"></li>
+<li><img src="{% static 'picture/05.jpg' %}" width="100" height="100"></li>
+<li><img src="{% static 'picture/06.jpg' %}" width="100" height="100"></li>
+</ul>
+<ol class="maxbox">
+<li><img src="{% static 'picture/1.jpg' %}" width="200" height="200"></li>
+<li><img src="{% static 'picture/2.jpg' %}" width="200" height="200"></li>
+<li><img src="{% static 'picture/3.jpg' %}" width="200" height="200"></li>
+<li><img src="{% static 'picture/4.jpg' %}" width="200" height="200"></li>
+<li><img src="{% static 'picture/50.jpg' %}" width="200" height="200"></li>
+<li><img src="{% static 'picture/60.jpg' %}" width="200" height="200"></li>
+</ol>
+</div>
+
+{% endblock %}

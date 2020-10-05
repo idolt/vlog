@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>博客类型</title>
+</head>
+<body>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <p>个人博客 &nbsp 类型:{{ bgt }}</p>
+    </div>
+    <div class="panel-body" id="myPage">
+        {% for bg in page.object_list %}
+            <p>{{ bg.title }}</p>
+            <p>作者：{{ bg.author }}  {{ bg.blog_type }}</p>
+            <p>更新时间：{{ bg.last_updated_time }}</p>
+            <p>{{ bg.content| truncatechars:60 }}
+                <a href='/vgcontent?id={{ bg.id }}'>详细内容</a>
+            </p>
+            <hr>
+        {% endfor %}
+    </div>
+
+     <div id="">
+         <nav aria-label="...">
+             <ul class="pagination">
+                 {%  if page.paginator.num_pages >= 5 %}
+                     <li id="pre" class="page page-item"><a class="page-link"><</a></li>
+                     <li id="n1" class="page-item" style="display: none"><a class="page-link">...</a></li>
+                     <li class="page page-item" id=1><a class="page-link" >1</a></li>
+                     <li class="page page-item" id=2><a class="page-link" >2</a></li>
+                     <li class="page page-item" id=3><a class="page-link" >3</a></li>
+                     <li class="page page-item" id=4><a class="page-link" >4</a></li>
+                     <li class="page page-item" id=5><a class="page-link" >5</a></li>
+                     <li id="n2" class="page-item"><a class="page-link">...</a></li>
+                     <li id="next" class="page page-item"><a class="page-link"> > </a></li>
+                     {% elif page.paginator.num_pages > 1 %}
+                         {% for num in page.paginator.page_range %}
+                             <li class="page page-item" id={{ num }}><a class="page-link" >{{ num }}</a></li>
+                         {% endfor %}
+                       {% elif page.paginator.num_pages == 1 %}
+                 {% endif %}
+             </ul>
+         </nav>
+     </div>
+</div>
+<script>
+      var page_now = {{ page.number }};
+    var page_pre = page_now-1;
+    var page_next = page_now+1;
+    var List = 1;
+    var count = {{ page.paginator.num_pages }};
+    $('#1').addClass("active");
+    if(page_now == 1) $("#pre").addClass("disabled");
+
+    $(document).ready(function(){
+        $('.page').click(function(){
+            let number = $(this).text();
+            let page ;
+            if(number.indexOf('<')==-1 && number.indexOf('>')==-1) {
+                page = parseInt(number);
+                }
+            if(number.indexOf('<')!=-1) {page = page_now-1;}
+                else if(number.indexOf('>')!=-1) {page = page_now+1;}
+            if(page == page_now || page <= 0 || page > {{ page.paginator.num_pages }}) return null;
+
+            type = localStorage.getItem('uid');      //获取本地储存uid
+            $.ajax({
+                url:'/vgsort/'+type+"?page="+page,
+                type:'GET',
+                data:{},
+                success:function(data){
+                    $('#myPage').empty();
+                      var json = eval(data['bg_page']);
+                      count = data["number"];
+                      for(var i=0;i<json.length;i++) {
+                          var ct = ''
+                          var len;
+                          if (json[i]['fields']['content'].length < 60) {
+                              len = json[i]['fields']['content'].length;
+                          } else {
+                              len = 60;
+                          }
+
+                          for (var j = 0; j < len; j++) {
+                              ct += json[i]['fields']['content'][j];
+                          }
+
+                          var hf = '/vgcontent/?id=' + json[i]['pk'];
+                          $('#myPage').append('<p>' + json[i]['fields']['title'] + '</p>');
+                          $('#myPage').append('<p>作者：' + json[i]['fields']['author'] + ' ' + json[i]['fields']['blog_type'] + '</p>');
+                          $('#myPage').append('<p>' + json[i]['fields']['last_updated_time'] + '</p>');
+                          $('#myPage').append('<p>' + ct + '...' + '<a href=' + hf + '>' + "详细内容" + '</a>' + '</p>');
+                          $('#myPage').append("<hr>")
+                      }
+
+                      console.log(json,json.length);
+                },
+                error:function(xhr){
+                    $('#myPage').html('error');
+                    alert(xhr.responseText);
+                },
+                complete:function(){ console.log('Work normal');}
+            });
+
+
+            if (count >5) {
+                let pgshow = page;
+                if (page <= 3) {
+                    if (page != page_now) {
+                        //      $("#" + page_now).removeClass("active");
+                        //      $("#" + page).addClass("active");
+                        if (page == 2) pgshow += 1;
+                        if (page == 1) pgshow += 2;
+                        $('#n1').css('display', 'none');
+
+                    }
+                } else {
+                    $('#n1').css('display', 'block');
+                }
+
+                if (page >= count - 2) {
+                    if (page == count - 1) pgshow -= 1;
+                    if (page == count) pgshow -= 2;
+                    $('#n2').css('display', 'none');
+                } else {
+                    $('#n2').css('display', 'block');
+                }
+
+                $('#1').html('<a class="page-link" >' + (pgshow - 2) + '</a>');
+                $('#2').html('<a class="page-link" >' + (pgshow - 1) + '</a>');
+                $('#3').html('<a class="page-link" >' + pgshow + '</a>');
+                $('#4').html('<a class="page-link" >' + (pgshow + 1) + '</a>');
+                $('#5').html('<a class="page-link" >' + (pgshow + 2) + '</a>');
+
+
+                if (page <= 3 || page >= count - 2) {
+                    $("#" + List).removeClass("active");
+                    if (page == 2) List = 2;
+                    else if (page == 1) List = 1;
+                    else if (page == count - 1) List = 4;
+                    else if (page == count) List = 5;
+                    else List = 3;
+                    $("#" + List).addClass("active");
+                } else {
+                    $("#" + List).removeClass("active");
+                    List = 3;
+                    $("#" + List).addClass("active");
+                }
+            }
+
+             if(count <= 5){
+                if(page != page_now)
+                $('#'+page_now).removeClass('active');
+                $(this).addClass("active");
+
+            }
+                page_now = page;
+                if(page_now == 1) $("#pre").addClass("disabled");
+                else $("#pre").removeClass("disabled");
+                if(page_now == {{ page.paginator.num_pages }}) $("#next").addClass("disabled");
+                else $("#next").removeClass("disabled");
+
+            return false;
+        })
+    })
+</script>
+
+</body>
+</html>

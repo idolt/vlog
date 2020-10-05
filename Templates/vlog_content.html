@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    博客内容
+{% endblock %}
+
+{% block blog %}
+
+    {% if user.is_authenticated %}
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <p class="modal-title" id="exampleModalLabel">回复</p>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div class="form-group">
+                    <label for="message-text" class="col-form-label">消息:</label>
+                    <textarea class="form-control" id="message-text"></textarea>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button onclick="Get_msg()" type="button" class="btn btn-primary" data-dismiss="modal">Send message</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <p class="modal-title" id="exampleModalLabel">提示</p>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  <h1>请先登录</h1>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+
+     <div class="container">
+        <hr>
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-6">
+                <div class="passage">
+                    <h1>{{ blog.title }}</h1>
+                    <p>作者：{{ blog.author }}</p>
+                    <p>类型：{{ blog.blog_type }}</p>
+                    <p>更新时间：{{ blog.last_updated_time|date:"Y-m-d H:i:s"}}</p>
+                    <p>{{ blog.content }}</p>
+                </div>
+                <hr>
+                {% if user.is_authenticated %}
+                <div>
+                    <p>评论区</p>
+                    {% csrf_token %}
+                    <textarea id="text" rows="6" cols="80"></textarea>
+                    <button onclick="sign()" class="btn btn-primary" type="button">提交评论</button>
+                </div>
+                {% else %}
+                    <div style="border-style: dashed;height:100px">
+                       <form style="margin:20px" method="POST" action="/login/">
+                            {% csrf_token %}
+                            <label>用户名</label>
+                            <input id="user" name="username"  type="text">
+                            <label>密码</label>
+                            <input id="psw" name="pwd" type="password">
+                            <button onclick="login()" type="button">登录</button>
+                       </form>
+                    </div>
+                {% endif %}
+                <hr>
+
+
+                <h1>评论内容</h1>
+                {% load static %}
+                <div id="comment">
+                    {% for comment in root_comment %}
+                        <div id = {{ comment.id }}>
+                            <p><b>{{ comment.user }}</b>({{ comment.date|date:"Y-m-d H:i:s" }}):</p>
+                            <p>{{ comment.comt }}<a href="javascript:reply({{ comment.id }}, {{ comment.id }})"><img style="float:right;" src="{% static 'icons/chat-text.svg' %}"></a></p>
+                            {% for c in comment.lof.all %}
+                                <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>{{ c.user }}</b>回复{{ c.parent.user }}({{ c.date|date:"Y-m-d H:i:s" }}):</p>
+                                <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ c.comt }}<a href="javascript:reply({{ c.id }}, {{ comment.id }})"><img style="float:right;" src="{% static 'icons/chat-text.svg' %}"></a></p>
+                            {% endfor %}
+                        </div>
+                        <hr>
+                    {% endfor %}
+                </div>
+
+            </div>
+            <div class="col-sm-2"></div>
+        </div>
+    </div>
+
+
+    <script>
+
+        function get_date(){
+            var d = new Date();
+            var year = d.getFullYear();
+            var month = d.getMonth()+1;
+            var day = d.getDate();
+            var hour = d.getHours();
+            var minute = d.getMinutes();
+            var second = d.getSeconds();
+           return("("+year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second+")");
+        }
+
+        function sign(){
+            var cot = $("#text").val();
+            if(cot == "") return null;
+            var blog_id = {{ blog.id }};
+            var cot_id
+
+            $.ajax({
+                url:'/Comment/',
+                type:"POST",
+                dataType:"json",
+                data:{"comment":cot,
+                      "id":blog_id,
+                      "csrfmiddlewaretoken": $("[name = 'csrfmiddlewaretoken']").val()},
+                success:function(data){
+                    $("#comment").prepend("<div id='"+data['com_id']+"'><p><b>{{ user.username }}</b>:"+get_date()+"</p>"+
+                                    "<p>"+cot+
+                        "<a href='javascript:reply("+data['com_id'] +","+ data['root_id']+")'><img style='float:right;' src='{% static 'icons/chat-text.svg' %}'></a></p>"+
+                        "<hr></div>");
+                },
+                error:function(xhr){}
+            })
+            $("#text").val("");
+        }
+
+    var root_id;
+    var parent_id;
+    var reply_to;
+    function Get_msg(){
+        var message = $("#message-text").val()
+        if(message == "") return null;
+        var blog_id = {{ blog.id }};
+            $.ajax({
+                url:'/Comment/',
+                type:"POST",
+                dataType:"json",
+                data:{"comment":message,
+                      "id":blog_id,
+                      "parent":parent_id,
+                      "root":root_id,
+                      "csrfmiddlewaretoken": $("[name = 'csrfmiddlewaretoken']").val()},
+                success:function(data){
+                     $("#"+root_id).append("<p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>{{ user.username }}</b>回复"+data['reply_to']+get_date()+":</p>"+
+                            "<p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"+message+
+                         "<a href='javascript:reply("+data['com_id'] +","+ data['root_id']+")'><img style='float:right;' src='{% static 'icons/chat-text.svg' %}'></a></p>"
+                         );
+                },
+                error:function(xhr){}
+            })
+            $("#message-text").val("");
+        }
+
+         function reply(parent,root){
+            $('#exampleModal').modal('show');
+            parent_id = parent;
+            root_id = root;
+            }
+
+
+        function login(){                  //登录
+            var username = $('#user').val();
+            var passward = $('#psw').val();
+            $.ajax({
+                url:'/login/',
+                type:"POST",
+                dataType:"json",
+                data:{"username":username,
+                      "pwd":passward,
+                      "syn":1,
+                      "csrfmiddlewaretoken": $("[name = 'csrfmiddlewaretoken']").val()},
+                success:function(data){
+                    window.location.reload();
+                },
+                error:function(xhr){
+                }
+            })
+        }
+
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block  title %}
+    登录
+{% endblock %}
+
+{% block blog %}
+    <div class="container">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-4" style="margin-top:45px">
+                <form method="POST" action="" style="margin-top:10px;margin-bottom:55px;background:#F8F8F8;">
+                  {% csrf_token %}
+                    <p style="margin-top:5px; margin-left:15px;font-size:15px;color:red;">{{ error }}</p>
+                    <div class="form-row">
+                    <div class="col-md-10">
+                      <label style="margin-left:15px;margin-top:10px;" for="validationDefault01">用户名</label>
+                      <input name="username" style="margin-left:15px;" type="text" class="form-control" id="validationDefault01" placeholder="请输入帐号">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="col-md-10">
+                      <label style="margin-left:15px;margin-top:10px;" for="validationDefault03">密码</label>
+                      <input name="pwd" style="margin-left:15px;" type="password" class="form-control" id="validationDefault03" placeholder="请输入密码">
+                    </div>
+                  </div>
+                    <div class="form-row">
+                        <button style="margin-top:30px;margin-left:15px;" class="col-md-10 btn btn-primary" type="submit">登录</button>
+                    </div>
+                    <div class="form-row" style="margin-top:50px;margin-left:15px;margin-bottom:25px;">
+                         <label>忘记密码</label>
+                    </div>
+                </form>
+
+            </div>
+    </div>
+
+{% endblock %}

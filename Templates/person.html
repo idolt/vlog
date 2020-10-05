@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}
+    个人页
+{% endblock %}
+
+{% block blog %}
+     <div class="container">
+        <hr>
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-6">
+                <h1>个人资料：
+                    {% if Is_sign  %}
+                        <button id="sign" onclick="sign_in()" class="btn btn-primary disabled">已签到</button>
+                    {% else %}
+                         <button id="sign" onclick="sign_in()" class="btn btn-primary">签到</button>
+                    {% endif %}
+                </h1>
+                <p>{{ user.username }}</p>
+                <p>登录时间：{{ user.last_login }}</p>
+                <p>关联邮箱：{{ user.email }}</p>
+            </div>
+            <div class="col-sm-2"></div>
+        </div>
+    </div>
+
+    <script>
+
+    function sign_in(){
+            $.ajax({
+                url:'/sign_in/',
+                type:"POST",
+                dataType:"json",
+                data:{
+                    "Is_sign":true,
+                    "csrfmiddlewaretoken": $("[name = 'csrfmiddlewaretoken']").val()
+                },
+                success:function(data){
+                    if(data.state == 100)
+                        {
+                            $("#sign").addClass("disabled");
+                            $("#sign").html("已签到")
+                        }
+                },
+                error:function(xhr){}
+            })
+
+        }
+
+    </script>
+{% endblock %}

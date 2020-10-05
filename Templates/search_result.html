@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    博客内容
+{% endblock %}
+
+{% block blog %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-8" id="myBlog">
+                {% for search in search_result %}
+                    <p><a href='/vgcontent?id={{ search.id }}'>{{ search.title }}</a></p>
+                    <p>作者：{{ search.author }}  {{ search.blog_type }}</p>
+                    <p>更新时间：{{ search.last_updated_time }}</p>
+                    <p>{{ search.content| truncatechars:40 }}</p>
+                    <hr>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <{% endblock %}
