@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+﻿from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from .models import *
 import json
@@ -220,7 +220,7 @@ def search(request):                            #搜索
         content = {"search_result": search_result, "word": word}
         return render(request, 'search_result.html', content)
     else:
-        return HttpResponse(json.dumps({"state": 103}, ensure_ascii=False))
+        return render(request, 'search_result.html')
 
 
 def sign_in(request):
